@@ -9,7 +9,7 @@ import Album from '../components/Album';
 import Sidebar from '../components/Sidebar';
 import Player from '../components/Player';
 
-import { convertAlbum, convertAlbums, skip } from '../utils';
+import { convertSong, convertAlbum, convertAlbums, skip } from '../utils';
 
 export default class AppContainer extends Component {
 
@@ -22,7 +22,10 @@ export default class AppContainer extends Component {
     this.next = this.next.bind(this);
     this.prev = this.prev.bind(this);
     this.selectAlbum = this.selectAlbum.bind(this);
+    this.selectArtist = this.selectArtist.bind(this);
     this.deselectAlbum = this.deselectAlbum.bind(this);
+    this.selectAlbumsByArtist = this.selectAlbumsByArtist.bind(this);
+    this.selectSongsByArtist = this.selectSongsByArtist.bind(this);
   }
 
   componentDidMount () {
@@ -113,6 +116,37 @@ export default class AppContainer extends Component {
     this.setState({ selectedAlbum: {}});
   }
 
+  selectArtist (artistId) {
+    axios.get(`/api/artists/${artistId}`)
+      .then(res => res.data)
+      .then(artist => {
+        return this.setState({
+          selectedArtist: artist
+        })
+      });
+  }
+
+  selectSongsByArtist (artistId) {
+    axios.get(`/api/artists/${artistId}/songs`)
+      .then(res => res.data)
+      .then(songs => {
+        return this.setState({
+          artistSongs: songs.map(song => convertSong(song))
+        });
+      });
+
+  }
+
+  selectAlbumsByArtist (artistId) {
+    axios.get(`/api/artists/${artistId}/albums`)
+      .then(res => res.data)
+      .then(albums => {
+        return this.setState({
+          artistAlbums: albums.map(album => convertAlbum(album))
+        });
+      })
+  }
+
   render () {
     return (
       <div id="main" className="container-fluid">
@@ -125,12 +159,17 @@ export default class AppContainer extends Component {
             React.cloneElement(this.props.children, {
                 album: this.state.selectedAlbum,
                 currentSong: this.state.currentSong,
-                sPlaying: this.state.isPlaying,
+                isPlaying: this.state.isPlaying,
                 toggleOne: this.toggleOne,
                 albums: this.state.albums,
                 selectAlbum: this.selectAlbum,
                 artists: this.state.artists,
-                selectedArtist: this.state.selectedArtist
+                selectArtist: this.selectArtist,
+                artist: this.state.selectedArtist,
+                selectAlbumsByArtist: this.selectAlbumsByArtist,
+                selectSongsByArtist: this.selectSongsByArtist,
+                artistAlbums: this.state.artistAlbums,
+                artistSongs: this.state.artistSongs
             }) : null
           }
         </div>
