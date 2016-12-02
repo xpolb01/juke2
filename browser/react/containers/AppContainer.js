@@ -30,16 +30,27 @@ export default class AppContainer extends Component {
       .then(res => res.data)
       .then(album => this.onLoad(convertAlbums(album)));
 
+    axios.get('/api/artists/')
+      .then(res => res.data)
+      .then(artists => this.onLoad(null, artists));
+
     AUDIO.addEventListener('ended', () =>
       this.next());
     AUDIO.addEventListener('timeupdate', () =>
       this.setProgress(AUDIO.currentTime / AUDIO.duration));
   }
 
-  onLoad (albums) {
-    this.setState({
-      albums: albums
-    });
+  onLoad (albums, artists) {
+    if (albums) {
+      this.setState({
+        albums: albums
+      });
+    } else {
+      this.setState({
+        artists: artists
+      });
+    }
+
   }
 
   play () {
@@ -117,7 +128,9 @@ export default class AppContainer extends Component {
                 sPlaying: this.state.isPlaying,
                 toggleOne: this.toggleOne,
                 albums: this.state.albums,
-                selectAlbum: this.selectAlbum
+                selectAlbum: this.selectAlbum,
+                artists: this.state.artists,
+                selectedArtist: this.state.selectedArtist
             }) : null
           }
         </div>
